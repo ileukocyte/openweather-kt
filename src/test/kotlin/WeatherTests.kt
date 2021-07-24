@@ -12,7 +12,7 @@ import javax.security.auth.login.LoginException
 internal class WeatherTests {
     @Test
     fun `weather api main tests`() {
-        runBlocking {
+        /*runBlocking {
             val api = openWeatherApi(System.getenv("WEATHER_API_KEY"), Units.METRIC)
 
             println(api.fromName("kyiv"))
@@ -33,6 +33,6 @@ internal class WeatherTests {
             assertThrows<LoginException> {
                 runBlocking { println(openWeatherApi {}) }
             }
-        }
+        }*/
     }
 }
