@@ -34,8 +34,8 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation(kotlinx("coroutines-core", version = coroutinesVersion))
 
-    /*testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")*/
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
 fun kotlinx(module: String, version: String) = "org.jetbrains.kotlinx:kotlinx-$module:$version"
@@ -61,9 +61,9 @@ tasks.withType<ShadowJar> {
     archiveClassifier.set("")
 }
 
-/*tasks.getByName<Test>("test") {
+tasks.getByName<Test>("test") {
     useJUnitPlatform()
-}*/
+}
 
 data class Version(
     val major: Int,
