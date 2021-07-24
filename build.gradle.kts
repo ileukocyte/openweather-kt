@@ -13,7 +13,7 @@ plugins {
     kotlin("jvm") version "1.5.21"
 
     id("maven-publish")
-    id("com.github.johnrengelman.shadow") version "5.1.0"
+    id("com.github.johnrengelman.shadow") version "6.0.0"
     id("com.github.ben-manes.versions") version "0.19.0"
 }
 
