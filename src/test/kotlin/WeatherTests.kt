@@ -6,13 +6,14 @@ import kotlinx.coroutines.runBlocking
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+
 import java.lang.IllegalArgumentException
 import javax.security.auth.login.LoginException
 
 internal class WeatherTests {
     @Test
     fun `weather api main tests`() {
-        /*runBlocking {
+        runBlocking {
             val api = openWeatherApi(System.getenv("WEATHER_API_KEY"), Units.METRIC)
 
             println(api.fromName("kyiv"))
@@ -33,6 +34,6 @@ internal class WeatherTests {
             assertThrows<LoginException> {
                 runBlocking { println(openWeatherApi {}) }
             }
-        }*/
+        }
     }
 }
