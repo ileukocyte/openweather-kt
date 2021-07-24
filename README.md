@@ -1,4 +1,4 @@
-# openweather-kt [![JitPack](https://jitpack.io/v/iileukocyte/openweather-kt.svg)](https://jitpack.io/#ileukocyte/openweather-kt)
+# openweather-kt [![](https://jitpack.io/v/ileukocyte/openweather-kt.svg)](https://jitpack.io/#ileukocyte/openweather-kt)
 openweather-kt is a simple Kotlin wrapper for Current Weather API by OpenWeatherMap.
 
 ## Examples
