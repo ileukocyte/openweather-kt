@@ -17,7 +17,7 @@ plugins {
 }
 
 group = "io.ileukocyte"
-version = Version(major = 1, minor = 0, unstable = 1, stability = Version.Stability.Alpha)
+version = Version(major = 1, minor = 0, unstable = 1, stability = Version.Stability.Beta)
 
 repositories {
     mavenCentral()
@@ -60,9 +60,9 @@ tasks.withType<ShadowJar> {
     archiveClassifier.set("")
 }
 
-tasks.getByName<Test>("test") {
+/*tasks.getByName<Test>("test") {
     useJUnitPlatform()
-}
+}*/
 
 data class Version(
     val major: Int,
