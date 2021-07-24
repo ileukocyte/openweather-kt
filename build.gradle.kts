@@ -57,6 +57,8 @@ build.apply {
 }
 
 tasks.withType<ShadowJar> {
+    project.setProperty("mainClassName", "io.ileukocyte.openweather.OpenWeatherApi")
+
     archiveBaseName.set("openweather-kt")
     archiveClassifier.set("")
 }
