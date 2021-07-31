@@ -18,7 +18,7 @@ println(forecast.wind.directionName)
 val api = openWeatherApi(OWM_API_KEY, language = Languages.RUSSIAN)
 
 val forecast = api.fromNameOrNull("London")
-val temperature = forecast?.temperature?.convertTo(TemperatureUnit.CELCIUS_DEGREE)
+val temperature = forecast?.temperature?.convertUnitsTo(TemperatureUnit.CELCIUS_DEGREE)
 
 println("${temperature?.temperature ?: 0}${temperature?.unit?.symbol ?: "K"}")
 ```
