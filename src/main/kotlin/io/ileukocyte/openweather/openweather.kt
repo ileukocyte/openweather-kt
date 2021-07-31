@@ -18,6 +18,19 @@ import java.net.URLEncoder
 import java.util.Date
 import javax.security.auth.login.LoginException
 
+/**
+ * The main class of the wrapper used for initializing the API
+ * and retrieving a weather forecast via its several functions
+ *
+ * @param key
+ * An authorization key for the API
+ * @param units
+ * A measurement unit system chosen by the user
+ * @param language
+ * A language of the API's responses
+ * @param client
+ * An optional custom Ktor HTTP client
+ */
 data class OpenWeatherApi internal constructor(
     val key: String,
     var units: Units = Units.DEFAULT,
@@ -27,45 +40,161 @@ data class OpenWeatherApi internal constructor(
     companion object {
         const val BASE_API = "http://api.openweathermap.org/data/2.5/weather"
 
+        /**
+         * The default Ktor HTTP client for the wrapper
+         */
         val HTTP_CLIENT = HttpClient(CIO)
     }
 
+    /**
+     * Retrieves the forecast via the name of a location
+     *
+     * @param name
+     * The name of a location
+     *
+     * @throws IllegalArgumentException
+     * If no location is found by the query
+     * @throws LoginException
+     * If the provided API key is invalid
+     *
+     * @return A [Forecast] instance based on the API response
+     *
+     * @see fromNameOrNull
+     */
     suspend fun fromName(name: String) =
         getForecast(name)
 
+    /**
+     * Retrieves the forecast via the OpenWeatherMap's unique ID of a location
+     *
+     * @param id
+     * The ID of a location
+     *
+     * @throws IllegalArgumentException
+     * If no location is found by the query
+     * @throws LoginException
+     * If the provided API key is invalid
+     *
+     * @return A [Forecast] instance based on the API response
+     *
+     * @see fromIdOrNull
+     */
     suspend fun fromId(id: Int) =
         getForecast(id.toString(), FetchMode.ID)
 
+    /**
+     * Retrieves the forecast via the zip code of a location
+     *
+     * @param zip
+     * The zip code of a location
+     *
+     * @throws IllegalArgumentException
+     * If no location is found by the query
+     * @throws LoginException
+     * If the provided API key is invalid
+     *
+     * @return A [Forecast] instance based on the API response
+     *
+     * @see fromZipCodeOrNull
+     */
     suspend fun fromZipCode(zip: String) =
         getForecast(zip, FetchMode.ZIP_CODE)
 
+    /**
+     * Retrieves the forecast via the geographical coordinates of a location
+     *
+     * @param coords
+     * A [Coordinates] instance containing data about the geographical coordinates of a location
+     *
+     * @throws IllegalArgumentException
+     * If no location is found by the query
+     * @throws LoginException
+     * If the provided API key is invalid
+     *
+     * @return A [Forecast] instance based on the API response
+     *
+     * @see fromCoordinatesOrNull
+     */
     suspend fun fromCoordinates(coords: Coordinates) =
         getForecast("${coords.longitude}|${coords.latitude}", FetchMode.COORDINATES)
 
+    /**
+     * Retrieves the forecast via the name of a location
+     *
+     * @param name
+     * The name of a location
+     *
+     * @return A [Forecast] instance based on the API response, or null if no location is found
+     *
+     * @see fromName
+     */
     suspend fun fromNameOrNull(name: String) = try {
         fromName(name)
     } catch (_: IllegalArgumentException) {
         null
     }
 
+    /**
+     * Retrieves the forecast via the OpenWeatherMap's unique ID of a location
+     *
+     * @param id
+     * The ID of a location
+     *
+     * @return A [Forecast] instance based on the API response, or null if no location is found
+     *
+     * @see fromId
+     */
     suspend fun fromIdOrNull(id: Int) = try {
         fromId(id)
     } catch (_: IllegalArgumentException) {
         null
     }
 
+    /**
+     * Retrieves the forecast via the zip code of a location
+     *
+     * @param zip
+     * The zip code of a location
+     *
+     * @return A [Forecast] instance based on the API response, or null if no location is found
+     *
+     * @see fromZipCode
+     */
     suspend fun fromZipCodeOrNull(zip: String) = try {
         fromZipCode(zip)
     } catch (_: IllegalArgumentException) {
         null
     }
 
+    /**
+     * Retrieves the forecast via the geographical coordinates of a location
+     *
+     * @param coords
+     * A [Coordinates] instance containing data about the geographical coordinates of a location
+     *
+     * @return A [Forecast] instance based on the API response, or null if no location is found
+     *
+     * @see fromCoordinates
+     */
     suspend fun fromCoordinatesOrNull(coords: Coordinates) = try {
         fromCoordinates(coords)
     } catch (_: IllegalArgumentException) {
         null
     }
 
+    /**
+     * An internal function that retrieves the forecast via the selected type of the query
+     * and is utilized for the separate public retrieving functions
+     *
+     * @see fromName
+     * @see fromNameOrNull
+     * @see fromId
+     * @see fromIdOrNull
+     * @see fromZipCode
+     * @see fromZipCodeOrNull
+     * @see fromCoordinates
+     * @see fromCoordinatesOrNull
+     */
     private suspend fun getForecast(
         query: String,
         fetchMode: FetchMode = FetchMode.NAME
@@ -196,8 +325,30 @@ class WeatherBuilder {
         throw LoginException("The provided API key is empty!")
 }
 
+/**
+ * A function that initializes the API wrapper instance with the provided data
+ *
+ * @param init
+ * A lambda function with a [WeatherBuilder] receiver where the data must be provided
+ *
+ * @return An [OpenWeatherApi] instance
+ */
 inline fun openWeatherApi(init: WeatherBuilder.() -> Unit) = WeatherBuilder().apply(init)()
 
+/**
+ * A function that initializes the API wrapper instance with the provided data
+ *
+ * @param key
+ * An authorization key for the API
+ * @param units
+ * A measurement unit system chosen by the user
+ * @param language
+ * A language of the API's responses
+ * @param client
+ * An optional custom Ktor HTTP client
+ *
+ * @return An [OpenWeatherApi] instance
+ */
 fun openWeatherApi(
     key: String,
     units: Units = Units.DEFAULT,
@@ -210,12 +361,18 @@ fun openWeatherApi(
     this.client = client
 }
 
+/**
+ * A measurement unit system chosen by the user
+ */
 enum class Units(val raw: String?) {
     DEFAULT(null),
     METRIC("metric"),
     IMPERIAL("imperial")
 }
 
+/**
+ * A language of the API's responses
+ */
 enum class Languages(val raw: String) {
     AFRIKAANS("af"),
     ALBANIAN("al"),
