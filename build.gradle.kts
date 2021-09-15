@@ -4,13 +4,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val ktorVersion: String by project
 val kotlinVersion: String by project
-val coroutinesVersion: String by project
 
 plugins {
     java
     application
 
-    kotlin("jvm") version "1.5.21"
+    kotlin("jvm") version "1.5.30"
 
     id("maven")
     id("maven-publish")
@@ -32,12 +31,12 @@ dependencies {
 
     implementation(group = "org.json", name = "json", version = "20210307")
 
-    implementation(kotlin("stdlib"))
-    implementation(kotlin("reflect"))
-    implementation(kotlinx("coroutines-core", version = coroutinesVersion))
+    implementation(kotlin("stdlib", kotlinVersion))
+    implementation(kotlin("reflect", kotlinVersion))
+    implementation(kotlinx("coroutines-core", version = "1.5.2"))
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.2")
 }
 
 fun kotlinx(module: String, version: String) = "org.jetbrains.kotlinx:kotlinx-$module:$version"
