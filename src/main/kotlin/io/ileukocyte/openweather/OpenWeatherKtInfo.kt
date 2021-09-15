@@ -1,7 +1,7 @@
 package io.ileukocyte.openweather
 
 object OpenWeatherKtInfo {
-    val VERSION = Version(major = 1, minor = 0)
+    val VERSION = Version(major = 1, minor = 0, patch = 1)
 
     const val GITHUB = "https://github.com/ileukocyte/openweather-kt"
 
