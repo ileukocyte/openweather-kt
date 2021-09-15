@@ -17,6 +17,7 @@ internal class WeatherTests {
             val api = openWeatherApi(System.getenv("WEATHER_API_KEY"), Units.METRIC)
 
             println(api.fromName("kyiv"))
+            println(api.fromName("москва"))
 
             println(api.fromId(2643743))
             println(api.fromCoordinates(Coordinates(-0.1257f, 51.5085f)))

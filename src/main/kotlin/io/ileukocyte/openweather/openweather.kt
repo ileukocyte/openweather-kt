@@ -11,10 +11,10 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.features.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.formUrlEncode
 
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
-import java.net.URLEncoder
 import java.util.Date
 import javax.security.auth.login.LoginException
 
@@ -201,31 +201,31 @@ data class OpenWeatherApi internal constructor(
     ): Forecast {
         val unit = units.raw
 
-        val requestUrl = buildString {
-            append(BASE_API)
-            append("?appid=$key")
-            append("&lang=${language.raw}")
+        val queryParam = when (fetchMode) {
+            FetchMode.NAME -> setOf("q" to query)
+            FetchMode.ID -> setOf("id" to query)
+            FetchMode.ZIP_CODE -> setOf("zip" to query)
+            FetchMode.COORDINATES -> {
+                val coords = query.split("|").take(2)
+                    .mapNotNull { it.toFloatOrNull() }
 
-            when (fetchMode) {
-                FetchMode.NAME -> append("&q=${URLEncoder.encode(query, "UTF-8")}")
-                FetchMode.ID -> append("&id=$query")
-                FetchMode.ZIP_CODE -> append("&zip=${URLEncoder.encode(query, "UTF-8")}")
-                FetchMode.COORDINATES -> {
-                    val coords = query.split("|").take(2)
-                        .mapNotNull { it.toFloatOrNull() }
+                if (coords.size != 2)
+                    throw IllegalArgumentException("A wrong coordinates format has been used!")
 
-                    if (coords.size != 2)
-                        throw IllegalArgumentException("A wrong coordinates format has been used!")
-
-                    append("&lon=${coords[0]}&lat=${coords[1]}")
-                }
+                setOf("lon" to "${coords[0]}", "lat" to "${coords[1]}")
             }
-
-            unit?.let { append("&units=$it") }
         }
 
+        val params = mutableMapOf(
+            "appid" to key,
+            "lang" to language.raw,
+            unit?.let { "units" } to unit.orEmpty()
+        )
+
+        queryParam.forEach { (k, v) -> params[k] = v }
+
         val response = try {
-            client.get<String>(requestUrl)
+            client.get<String>("$BASE_API?${params.filter { it.key !== null }.map { it.key!! to it.value }.formUrlEncode()}")
         } catch (e: ClientRequestException) {
             when (e.response.status) {
                 HttpStatusCode.Unauthorized ->
