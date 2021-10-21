@@ -9,13 +9,13 @@ plugins {
     java
     application
 
-    kotlin("jvm") version "1.5.30"
+    kotlin("jvm") version "1.5.31"
 
-    id("maven")
-    id("maven-publish")
+    /*id("maven")
+    id("maven-publish")*/
 
-    id("com.github.johnrengelman.shadow") version "6.0.0"
-    id("com.github.ben-manes.versions") version "0.19.0"
+    id("com.github.johnrengelman.shadow") version "7.1.0"
+    id("com.github.ben-manes.versions") version "0.39.0"
 }
 
 group = "io.ileukocyte"
@@ -35,8 +35,8 @@ dependencies {
     implementation(kotlin("reflect", kotlinVersion))
     implementation(kotlinx("coroutines-core", version = "1.5.2"))
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
 }
 
 fun kotlinx(module: String, version: String) = "org.jetbrains.kotlinx:kotlinx-$module:$version"
@@ -73,13 +73,14 @@ data class Version(
     val minor: Int,
     val patch: Int = 0,
     val stability: Stability = Stability.Stable,
-    val unstable: Int = 0
+    val unstable: Int = 0,
 ) {
     override fun toString() = arrayOf(
         major,
         minor,
-        patch.takeUnless { it == 0 }
-    ).filterNotNull().joinToString(separator = ".") + stability.suffix?.let { "-$it$unstable" }.orEmpty()
+        patch.takeUnless { it == 0 },
+    ).filterNotNull().joinToString(separator = ".") +
+            stability.suffix?.let { "-$it$unstable" }.orEmpty()
 
     sealed class Stability(val suffix: String? = null) {
         object Stable : Stability()

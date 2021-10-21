@@ -18,15 +18,15 @@ import java.util.TimeZone
 data class Time(
     val timeZone: TimeZone,
     val sunrise: Date,
-    val sunset: Date
+    val sunset: Date,
 ) {
     internal constructor(
         timeOffset: Int,
         sunrise: Date,
-        sunset: Date
+        sunset: Date,
     ) : this(
         TimeZone.getTimeZone(ZoneId.ofOffset("GMT", ZoneOffset.ofTotalSeconds(timeOffset))),
         sunrise,
-        sunset
+        sunset,
     )
 }

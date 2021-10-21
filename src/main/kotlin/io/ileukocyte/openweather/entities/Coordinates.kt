@@ -10,5 +10,5 @@ package io.ileukocyte.openweather.entities
  */
 data class Coordinates(
     val longitude: Float,
-    val latitude: Float
+    val latitude: Float,
 )

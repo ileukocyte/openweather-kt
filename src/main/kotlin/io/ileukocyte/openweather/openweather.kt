@@ -8,7 +8,7 @@ import io.ileukocyte.openweather.extensions.internal.toJSONObject
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.features.ClientRequestException
+import io.ktor.client.features.ResponseException
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.formUrlEncode
@@ -225,15 +225,15 @@ data class OpenWeatherApi internal constructor(
         queryParam.forEach { (k, v) -> params[k] = v }
 
         val response = try {
-            client.get<String>("$BASE_API?${params.filter { it.key !== null }.map { it.key!! to it.value }.formUrlEncode()}")
-        } catch (e: ClientRequestException) {
-            when (e.response.status) {
+            client.get<String>(
+                "$BASE_API?${params.filter { it.key !== null }.map { it.key!! to it.value }.formUrlEncode()}")
+        } catch (e: ResponseException) {
+            throw when (e.response.status) {
                 HttpStatusCode.Unauthorized ->
-                    throw LoginException("UNAUTHORIZED: A wrong API key has been provided!")
+                    LoginException("UNAUTHORIZED: A wrong API key has been provided!")
                 HttpStatusCode.NotFound ->
-                    throw IllegalArgumentException("Nothing has been found by the provided query!")
-                else ->
-                    throw IllegalStateException(e)
+                    IllegalArgumentException("Nothing has been found by the provided query!")
+                else -> IllegalStateException(e)
             }
         }
 
@@ -260,11 +260,13 @@ data class OpenWeatherApi internal constructor(
             main.getFloat("temp_max"),
             Temperature.TemperatureUnit.values().first { it.units == units }
         )
+
         val pressure = Pressure(
             main.getFloat("pressure"),
             main.getFloatOrNull("sea_level"),
             main.getFloatOrNull("grnd_level")
         )
+
         val humidity = Humidity(main.getIntOrNull("humidity"))
 
         val visibility = Visibility(json.getIntOrNull("visibility"))

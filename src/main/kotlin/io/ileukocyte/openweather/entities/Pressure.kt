@@ -13,5 +13,5 @@ package io.ileukocyte.openweather.entities
 data class Pressure(
     val pressure: Float,
     val seaLevelPressure: Float?,
-    val groundLevelPressure: Float?
+    val groundLevelPressure: Float?,
 )

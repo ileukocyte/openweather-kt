@@ -13,5 +13,5 @@ package io.ileukocyte.openweather.entities
 data class Location(
     val name: String,
     val id: Int,
-    val countryCode: String
+    val countryCode: String,
 )

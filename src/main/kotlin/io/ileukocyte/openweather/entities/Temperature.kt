@@ -21,11 +21,11 @@ data class Temperature(
     val feelsLike: Float,
     val minTemperature: Float,
     val maxTemperature: Float,
-    val unit: TemperatureUnit
+    val unit: TemperatureUnit,
 ) {
     enum class TemperatureUnit(val symbol: String, val units: Units) {
         KELVIN("K", Units.DEFAULT),
         CELSIUS_DEGREES("\u00b0C", Units.METRIC),
-        FAHRENHEIT_DEGREES("\u00b0F", Units.IMPERIAL)
+        FAHRENHEIT_DEGREES("\u00b0F", Units.IMPERIAL),
     }
 }

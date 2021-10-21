@@ -14,7 +14,12 @@ import io.ileukocyte.openweather.Units
  * @param unit
  * A speed/gust unit value provided by OpenWeatherMap API
  */
-data class Wind(val speed: Float, val direction: Int?, val gust: Float?, val unit: WindUnit) {
+data class Wind(
+    val speed: Float,
+    val direction: Int?,
+    val gust: Float?,
+    val unit: WindUnit,
+) {
     /**
      * A wind direction name from [the degree value][direction]
      */
@@ -32,6 +37,6 @@ data class Wind(val speed: Float, val direction: Int?, val gust: Float?, val uni
 
     enum class WindUnit(val asString: String, vararg val units: Units) {
         METERS_PER_SECONDS("m/s", Units.METRIC, Units.DEFAULT),
-        MILES_PER_HOUR("mph", Units.IMPERIAL);
+        MILES_PER_HOUR("mph", Units.IMPERIAL),
     }
 }

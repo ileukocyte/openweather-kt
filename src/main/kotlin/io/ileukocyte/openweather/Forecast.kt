@@ -3,7 +3,7 @@ package io.ileukocyte.openweather
 import io.ileukocyte.openweather.entities.*
 
 /**
- * A [OpenWeatherApi] wrapper of the requested forecast
+ * An [OpenWeatherApi] wrapper of the requested forecast
  *
  * @param api
  * The current [OpenWeatherApi] instance
@@ -39,5 +39,5 @@ data class Forecast(
     val time: Time,
     val visibility: Visibility,
     val weather: Weather,
-    val wind: Wind
+    val wind: Wind,
 )
