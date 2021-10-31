@@ -19,27 +19,29 @@ plugins {
 }
 
 group = "io.ileukocyte"
-version = Version(major = 1, minor = 0, patch = 1)
+version = Version(major = 1, minor = 1, stability = Version.Stability.Beta)
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation(group = "io.ktor", name = "ktor-client-core", version = ktorVersion)
-    implementation(group = "io.ktor", name = "ktor-client-cio", version = ktorVersion)
-
-    implementation(group = "org.json", name = "json", version = "20210307")
+    implementation(ktor("client-core"))
+    implementation(ktor("client-cio"))
+    implementation(ktor("client-serialization"))
 
     implementation(kotlin("stdlib", kotlinVersion))
     implementation(kotlin("reflect", kotlinVersion))
     implementation(kotlinx("coroutines-core", version = "1.5.2"))
+    implementation(kotlinx("serialization-json", "1.3.0"))
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
 }
 
 fun kotlinx(module: String, version: String) = "org.jetbrains.kotlinx:kotlinx-$module:$version"
+
+fun ktor(module: String, version: String = ktorVersion) = "io.ktor:ktor-$module:$version"
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"

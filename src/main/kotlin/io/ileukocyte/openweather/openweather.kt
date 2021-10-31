@@ -2,13 +2,12 @@
 package io.ileukocyte.openweather
 
 import io.ileukocyte.openweather.entities.*
-import io.ileukocyte.openweather.extensions.internal.getFloatOrNull
-import io.ileukocyte.openweather.extensions.internal.getIntOrNull
-import io.ileukocyte.openweather.extensions.internal.toJSONObject
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.features.ResponseException
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.formUrlEncode
@@ -17,6 +16,8 @@ import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import java.util.Date
 import javax.security.auth.login.LoginException
+
+import kotlinx.serialization.json.*
 
 /**
  * The main class of the wrapper used for initializing the API
@@ -35,7 +36,7 @@ data class OpenWeatherApi internal constructor(
     val key: String,
     var units: Units = Units.DEFAULT,
     var language: Languages = Languages.ENGLISH,
-    val client: HttpClient = HTTP_CLIENT
+    val client: HttpClient = HTTP_CLIENT,
 ) {
     companion object {
         const val BASE_API = "http://api.openweathermap.org/data/2.5/weather"
@@ -43,7 +44,9 @@ data class OpenWeatherApi internal constructor(
         /**
          * The default Ktor HTTP client for the wrapper
          */
-        val HTTP_CLIENT = HttpClient(CIO)
+        val HTTP_CLIENT = HttpClient(CIO) {
+            install(JsonFeature) { serializer = KotlinxSerializer() }
+        }
     }
 
     /**
@@ -225,7 +228,7 @@ data class OpenWeatherApi internal constructor(
         queryParam.forEach { (k, v) -> params[k] = v }
 
         val response = try {
-            client.get<String>(
+            client.get<JsonObject>(
                 "$BASE_API?${params.filter { it.key !== null }.map { it.key!! to it.value }.formUrlEncode()}")
         } catch (e: ResponseException) {
             throw when (e.response.status) {
@@ -237,59 +240,61 @@ data class OpenWeatherApi internal constructor(
             }
         }
 
-        val json = response.toJSONObject()
-
-        val (longitude, latitude) = json.getJSONObject("coord")
-            .let { it.getFloat("lon") to it.getFloat("lat") }
+        val (longitude, latitude) = response["coord"]!!.jsonObject
+            .let { it["lon"]!!.jsonPrimitive.float to it["lat"]!!.jsonPrimitive.float }
         val coords = Coordinates(longitude, latitude)
 
-        val weather = json.getJSONArray("weather").getJSONObject(0)
+        val weather = response["weather"]!!.jsonArray.first().jsonObject
             .let { Weather(
-                it.getInt("id"),
-                it.getString("main"),
-                it.getString("description"),
-                it.getString("icon")
+                it["id"]!!.jsonPrimitive.int,
+                it["main"]!!.jsonPrimitive.toString(),
+                it["description"]!!.jsonPrimitive.toString(),
+                it["icon"]!!.jsonPrimitive.toString(),
             ) }
 
-        val main = json.getJSONObject("main")
+        val main = response["main"]!!.jsonObject
 
         val temperature = Temperature(
-            main.getFloat("temp"),
-            main.getFloat("feels_like"),
-            main.getFloat("temp_min"),
-            main.getFloat("temp_max"),
-            Temperature.TemperatureUnit.values().first { it.units == units }
+            main["temp"]!!.jsonPrimitive.float,
+            main["feels_like"]!!.jsonPrimitive.float,
+            main["temp_min"]!!.jsonPrimitive.float,
+            main["temp_max"]!!.jsonPrimitive.float,
+            Temperature.TemperatureUnit.values().first { it.units == units },
         )
 
         val pressure = Pressure(
-            main.getFloat("pressure"),
-            main.getFloatOrNull("sea_level"),
-            main.getFloatOrNull("grnd_level")
+            main["pressure"]!!.jsonPrimitive.float,
+            main["sea_level"]?.jsonPrimitive?.floatOrNull,
+            main["grnd_level"]?.jsonPrimitive?.floatOrNull,
         )
 
-        val humidity = Humidity(main.getIntOrNull("humidity"))
+        val humidity = Humidity(main["humidity"]?.jsonPrimitive?.intOrNull)
 
-        val visibility = Visibility(json.getIntOrNull("visibility"))
+        val visibility = Visibility(response["visibility"]?.jsonPrimitive?.intOrNull)
 
-        val wind = json.getJSONObject("wind")
+        val wind = response["wind"]!!.jsonObject
             .let { Wind(
-                it.getFloat("speed"),
-                it.getIntOrNull("deg"),
-                it.getFloatOrNull("gust"),
-                Wind.WindUnit.values().first { u -> units in u.units }
+                it["speed"]!!.jsonPrimitive.float,
+                it["deg"]?.jsonPrimitive?.intOrNull,
+                it["gust"]?.jsonPrimitive?.floatOrNull,
+                Wind.WindUnit.values().first { u -> units in u.units },
             ) }
 
-        val cloudiness = Cloudiness(json.getJSONObject("clouds").getInt("all"))
+        val cloudiness = Cloudiness(response["clouds"]!!.jsonObject["all"]!!.jsonPrimitive.int)
 
-        val system = json.getJSONObject("sys")
+        val system = response["sys"]!!.jsonObject
 
         val time = system.let { Time(
-            json.getInt("timezone"),
-            Date(it.getLong("sunrise") * 1000),
-            Date(it.getLong("sunset") * 1000)
+            response["timezone"]!!.jsonPrimitive.int,
+            Date(it["sunrise"]!!.jsonPrimitive.long * 1000),
+            Date(it["sunset"]!!.jsonPrimitive.long * 1000),
         ) }
 
-        val location = Location(json.getString("name"), json.getInt("id"), system.getString("country"))
+        val location = Location(
+            response["name"]!!.jsonPrimitive.toString(),
+            response["id"]!!.jsonPrimitive.int,
+            system["country"]!!.jsonPrimitive.toString(),
+        )
 
         return Forecast(
             this,
@@ -302,7 +307,7 @@ data class OpenWeatherApi internal constructor(
             time,
             visibility,
             weather,
-            wind
+            wind,
         )
     }
 
@@ -310,7 +315,7 @@ data class OpenWeatherApi internal constructor(
         NAME,
         ID,
         COORDINATES,
-        ZIP_CODE
+        ZIP_CODE,
     }
 }
 
@@ -321,10 +326,9 @@ class WeatherBuilder {
     var language = Languages.ENGLISH
     var client = OpenWeatherApi.HTTP_CLIENT
 
-    operator fun invoke() = if (::key.isInitialized)
+    operator fun invoke() = if (::key.isInitialized) {
         OpenWeatherApi(key, units, language, client)
-    else
-        throw LoginException("The provided API key is empty!")
+    } else throw LoginException("The provided API key is empty!")
 }
 
 /**
@@ -355,7 +359,7 @@ fun openWeatherApi(
     key: String,
     units: Units = Units.DEFAULT,
     language: Languages = Languages.ENGLISH,
-    client: HttpClient = OpenWeatherApi.HTTP_CLIENT
+    client: HttpClient = OpenWeatherApi.HTTP_CLIENT,
 ) = openWeatherApi {
     this.key = key
     this.units = units
@@ -369,7 +373,7 @@ fun openWeatherApi(
 enum class Units(val raw: String?) {
     DEFAULT(null),
     METRIC("metric"),
-    IMPERIAL("imperial")
+    IMPERIAL("imperial"),
 }
 
 /**
@@ -421,5 +425,5 @@ enum class Languages(val raw: String) {
     TURKISH("tr"),
     UKRAINIAN("ua"),
     VIETNAMESE("vi"),
-    ZULU("zu")
+    ZULU("zu"),
 }

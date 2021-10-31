@@ -24,8 +24,8 @@ internal class WeatherTests {
 
             println(api.fromZipCode("94040,us"))
 
-            assert(api.fromNameOrNull("Washington D.C.") != null)
-            assert(api.fromNameOrNull("nothing must be found") == null)
+            assert(api.fromNameOrNull("Washington D.C.") !== null)
+            assert(api.fromNameOrNull("nothing must be found") === null)
 
             assertThrows<IllegalArgumentException> { runBlocking { println(api.fromName("nothing must be found")) } }
 
