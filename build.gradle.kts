@@ -7,7 +7,6 @@ val kotlinVersion: String by project
 
 plugins {
     java
-    application
 
     kotlin("jvm") version "1.7.10"
     kotlin("plugin.serialization") version "1.7.10"
@@ -61,7 +60,7 @@ build.apply {
 }
 
 tasks.withType<ShadowJar> {
-    project.setProperty("mainClassName", "io.ileukocyte.openweather.OpenWeatherApi")
+    //project.setProperty("mainClassName", "io.ileukocyte.openweather.OpenWeatherApi")
 
     archiveBaseName.set("openweather-kt")
     archiveClassifier.set("")
