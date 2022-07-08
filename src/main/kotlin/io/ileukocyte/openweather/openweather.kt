@@ -4,13 +4,13 @@ package io.ileukocyte.openweather
 import io.ileukocyte.openweather.entities.*
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.features.ResponseException
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.formUrlEncode
+import io.ktor.serialization.kotlinx.json.json
 
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
@@ -45,7 +45,7 @@ data class OpenWeatherApi internal constructor(
          * The default Ktor HTTP client for the wrapper
          */
         val HTTP_CLIENT = HttpClient(CIO) {
-            install(JsonFeature) { serializer = KotlinxSerializer() }
+            install(ContentNegotiation) { json() }
         }
     }
 
@@ -227,18 +227,19 @@ data class OpenWeatherApi internal constructor(
 
         queryParam.forEach { (k, v) -> params[k] = v }
 
-        val response = try {
-            client.get<JsonObject>(
-                "$BASE_API?${params.filter { it.key !== null }.map { it.key!! to it.value }.formUrlEncode()}")
-        } catch (e: ResponseException) {
-            throw when (e.response.status) {
-                HttpStatusCode.Unauthorized ->
-                    LoginException("UNAUTHORIZED: A wrong API key has been provided!")
-                HttpStatusCode.NotFound ->
-                    IllegalArgumentException("Nothing has been found by the provided query!")
-                else -> IllegalStateException(e)
-            }
-        }
+        val response = client
+            .get("$BASE_API?${params.filter { it.key !== null }.map { it.key!! to it.value }.formUrlEncode()}")
+            .apply {
+                when (status) {
+                    HttpStatusCode.OK -> {}
+                    HttpStatusCode.Unauthorized ->
+                        throw LoginException("UNAUTHORIZED: A wrong API key has been provided!")
+                    HttpStatusCode.NotFound ->
+                        throw IllegalArgumentException("Nothing has been found by the provided query!")
+                    else ->
+                        throw IllegalStateException()
+                }
+            }.body<JsonObject>()
 
         val (longitude, latitude) = response["coord"]!!.jsonObject
             .let { it["lon"]!!.jsonPrimitive.float to it["lat"]!!.jsonPrimitive.float }

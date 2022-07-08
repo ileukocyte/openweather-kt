@@ -28,7 +28,6 @@ internal class WeatherTests {
             assert(api.fromNameOrNull("nothing must be found") === null)
 
             assertThrows<IllegalArgumentException> { runBlocking { println(api.fromName("nothing must be found")) } }
-
             assertThrows<LoginException> {
                 runBlocking { println(openWeatherApi("none").fromName("nothing must be found")) }
             }

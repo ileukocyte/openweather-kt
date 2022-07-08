@@ -9,13 +9,14 @@ plugins {
     java
     application
 
-    kotlin("jvm") version "1.5.31"
+    kotlin("jvm") version "1.7.10"
+    kotlin("plugin.serialization") version "1.7.10"
 
     /*id("maven")
     id("maven-publish")*/
 
-    id("com.github.johnrengelman.shadow") version "7.1.0"
-    id("com.github.ben-manes.versions") version "0.39.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("com.github.ben-manes.versions") version "0.42.0"
 }
 
 group = "io.ileukocyte"
@@ -26,17 +27,18 @@ repositories {
 }
 
 dependencies {
+    implementation(ktor("client-content-negotiation"))
     implementation(ktor("client-core"))
     implementation(ktor("client-cio"))
-    implementation(ktor("client-serialization"))
+    implementation(ktor("serialization-kotlinx-json"))
 
     implementation(kotlin("stdlib", kotlinVersion))
     implementation(kotlin("reflect", kotlinVersion))
-    implementation(kotlinx("coroutines-core", version = "1.5.2"))
-    implementation(kotlinx("serialization-json", "1.3.0"))
+    implementation(kotlinx("coroutines-core", version = "1.6.3"))
+    implementation(kotlinx("serialization-json", "1.3.3"))
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 }
 
 fun kotlinx(module: String, version: String) = "org.jetbrains.kotlinx:kotlinx-$module:$version"
