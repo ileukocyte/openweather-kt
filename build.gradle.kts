@@ -18,7 +18,7 @@ plugins {
 }
 
 group = "io.ileukocyte"
-version = Version(major = 1, minor = 1)
+version = Version(major = 1, minor = 1, patch = 1)
 
 repositories {
     mavenCentral()
@@ -60,14 +60,24 @@ build.apply {
 }
 
 tasks.withType<ShadowJar> {
-    //project.setProperty("mainClassName", "io.ileukocyte.openweather.OpenWeatherApi")
-
     archiveBaseName.set("openweather-kt")
     archiveClassifier.set("")
 }
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "io.ileukocyte"
+            artifactId = "openweather-kt"
+            version = Version(major = 1, minor = 1, patch = 1).toString()
+
+            from(components["java"])
+        }
+    }
 }
 
 data class Version(
